@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SQLitePCL;
 using MusiciansAPI.Queries;
 using MusiciansAPI.Repositories;
+using MusiciansAPI.Mutations;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,7 @@ Batteries.Init();
 builder.Services
     .AddGraphQLServer()
     .AddQueryType<Query>()
+    .AddMutationType<Mutation>()
     .AddType<MusicianDto>()
     .AddType<CollectiveDto>()
     .AddType<CountryDto>()
@@ -21,6 +23,9 @@ builder.Services
 
 builder.Services.AddPooledDbContextFactory<MusiciansDbContext>(m => m.UseSqlite(connectionString));
 builder.Services.AddScoped<MusiciansRepository>();
+builder.Services.AddScoped<CollectivesRepository>();
+builder.Services.AddScoped<CountriesRepository>();
+
 
 builder.Services.AddRazorPages();
 

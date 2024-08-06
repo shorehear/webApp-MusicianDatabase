@@ -33,6 +33,10 @@
 
         public static CollectiveDto ToDto(this Collective collective)
         {
+            if (collective == null)
+            {
+                return null;
+            }
             return new CollectiveDto
             {
                 Id = collective.Id,
@@ -45,6 +49,10 @@
 
         public static AlbumDto ToDto(this Album album)
         {
+            if (album == null)
+            {
+                return null;
+            }
             return new AlbumDto
             {
                 Id = album.Id,

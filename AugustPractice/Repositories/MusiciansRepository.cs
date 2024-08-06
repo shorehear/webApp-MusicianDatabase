@@ -44,5 +44,38 @@ namespace MusiciansAPI.Repositories
                 return await context.SaveChangesAsync() > 0;
             }
         }
+
+        public async Task<Musician> GetByIdAsync(Guid id)
+        {
+            using (MusiciansDbContext context = dbContextFactory.CreateDbContext())
+            {
+                return await context.Musicians.FindAsync(id);
+            }
+        }
+
+        public async Task<Musician> GetMusicianByNameAsync(string name)
+        {
+            using (MusiciansDbContext context = dbContextFactory.CreateDbContext())
+            {
+                return await context.Musicians.FirstOrDefaultAsync(m => m.MusicianName == name);
+            }
+        }
+
+        public async Task<bool> DeleteAlbumAsync(Guid albumId)
+        {
+            using (MusiciansDbContext context = dbContextFactory.CreateDbContext())
+            {
+                var album = await context.Albums.FindAsync(albumId);
+
+                if (album == null)
+                {
+                    return false;
+                }
+
+                context.Albums.Remove(album);
+                return await context.SaveChangesAsync() > 0;
+            }
+
+        }
     }
 }
