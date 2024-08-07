@@ -5,11 +5,9 @@ using MusiciansAPI.Queries;
 using MusiciansAPI.Repositories;
 using MusiciansAPI.Mutations;
 
-
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("default");
 Batteries.Init();
-
 
 builder.Services
     .AddGraphQLServer()
@@ -21,11 +19,10 @@ builder.Services
     .AddType<AlbumDto>()
     .AddType<Genre>();
 
-builder.Services.AddPooledDbContextFactory<MusiciansDbContext>(m => m.UseSqlite(connectionString));
+builder.Services.AddPooledDbContextFactory<MusiciansDbContext>(m => m.UseSqlite(connectionString).LogTo(Console.WriteLine));
 builder.Services.AddScoped<MusiciansRepository>();
 builder.Services.AddScoped<CollectivesRepository>();
 builder.Services.AddScoped<CountriesRepository>();
-
 
 builder.Services.AddRazorPages();
 
@@ -56,11 +53,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
 app.UseAuthorization();
 
 app.MapGraphQL();  
-
 app.MapRazorPages();
 
 app.Run();

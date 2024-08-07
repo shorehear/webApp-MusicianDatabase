@@ -125,7 +125,7 @@ namespace MusiciansAPI.Mutations
             return isDeleted;
         }
         #endregion
-        public async Task<CollectiveDto> CreateCollective() { return null; }
+        //public async Task<CollectiveDto> CreateCollective() { return null; }
 
         #region add album data to collective/musician
         //public async Task<AlbumDto> AddAlbum(
@@ -139,19 +139,22 @@ namespace MusiciansAPI.Mutations
         //{
         //    Musician? musician = null;
         //    Collective? collective = null;
-            
-        //    //if that is musician
+
+        //    if that is musician
         //    if (musicianId.HasValue)
-        //    {
-        //        musician = await musiciansRepository.GetByIdAsync(musicianId.Value);
-        //    }
-        //    else if (!string.IsNullOrEmpty(musicianName))
-        //    {
-        //        musician = await musiciansRepository.GetMusicianByNameAsync(musicianName);
-        //    }
+        //        {
+        //            musician = await musiciansRepository.GetByIdAsync(musicianId.Value);
+        //        }
+        //        else if (!string.IsNullOrEmpty(musicianName))
+        //        {
+        //            musician = await musiciansRepository.GetMusicianByNameAsync(musicianName);
+        //        }
 
-        //    //if that is collective
-
+        //    if that is collective
+        //    if (collectiveId.HasValue)
+        //        {
+        //            collective = await collectivesRepository.
+        //    }
         //    if (musician == null && collective == null)
         //    {
         //        throw new Exception("You must provide musician or collective to associate with album.");
@@ -168,7 +171,7 @@ namespace MusiciansAPI.Mutations
         //    };
 
         //    var addedAlbum = await musiciansRepository.AddAlbumAsync(album);
-        //    return new 
+        //    return new
         //}
         #endregion
     }

@@ -4,6 +4,9 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using HotChocolate;
 
+using MusiciansAPI.Types;
+using System.Reflection.Metadata;
+
 namespace MusiciansAPI.Queries
 {
     public class Query
@@ -19,6 +22,19 @@ namespace MusiciansAPI.Queries
                 .ToListAsync();
 
             return musicians.Select(m => m.ToDto());
+        }
+
+
+        //в таком случае будет загружаться не вся бд, а только то, что напагинировалось
+        [UseDbContext(typeof(MusiciansDbContext))]
+        [UsePaging(IncludeTotalCount = true, DefaultPageSize = 10)]
+        public IQueryable<MusicianDto> GetPaginatedMusicians([ScopedService] MusiciansDbContext context)
+        {
+            return context.Musicians
+                .Include(m => m.Country)
+                .Include(m => m.Collective)
+                .Include(m => m.Albums)
+                .Select(m => m.ToDto());
         }
         #endregion
 
@@ -56,6 +72,13 @@ namespace MusiciansAPI.Queries
                 .ToListAsync();
 
             return collectives.Select(c => c.ToDto());
+        }
+
+        [UseDbContext(typeof(MusiciansDbContext))]
+        [UsePaging(IncludeTotalCount = true, DefaultPageSize = 10)]
+        public IQueryable<CollectiveDto> GetPaginatedCollectives([ScopedService] MusiciansDbContext context)
+        {
+            return context.Collectives.Select(c => c.ToDto());
         }
         #endregion
 
@@ -99,6 +122,23 @@ namespace MusiciansAPI.Queries
                 .ToListAsync();
 
             return collectives.Select(c => c.ToDto());
+        }
+
+        [UseDbContext(typeof(MusiciansDbContext))]
+        [UsePaging(IncludeTotalCount = true, DefaultPageSize = 10)]
+        public IQueryable<CollectiveDto> GetPaginatedCollectiveByGenre(string genre, [ScopedService] MusiciansDbContext context) 
+        {
+            if (!Enum.TryParse<Genre>(genre, ignoreCase: true, out var parsedGenre))
+            {
+                return Enumerable.Empty<CollectiveDto>().AsQueryable();
+            }
+
+            return context.Collectives
+                .Where(c => c.CollectiveGenre == parsedGenre)
+                .Include(c => c.CollectiveMembers)
+                    .ThenInclude(m => m.Country)
+                .Include(c => c.Albums)
+                .Select(c => c.ToDto());
         }
         #endregion
     }

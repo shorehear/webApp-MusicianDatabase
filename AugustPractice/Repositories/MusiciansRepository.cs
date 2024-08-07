@@ -23,7 +23,6 @@ namespace MusiciansAPI.Repositories
                 return musician;
             }
         }
-
         public async Task<Musician> Update(Musician musician)
         {
             using (MusiciansDbContext context = dbContextFactory.CreateDbContext())
