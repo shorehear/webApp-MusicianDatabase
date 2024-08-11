@@ -1,84 +1,85 @@
 ﻿using MusiciansAPI.Database;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using HotChocolate;
-
-using MusiciansAPI.Types;
-using System.Reflection.Metadata;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 
 namespace MusiciansAPI.Queries
 {
     public class Query
     {
+        private readonly IMapper mapper;
+        public Query(IMapper mapper)
+        {
+            this.mapper = mapper;
+        }
+
         #region get all musicians
+        [UseSorting]
         public async Task<IEnumerable<MusicianDto>> GetMusicians([Service] IDbContextFactory<MusiciansDbContext> dbContextFactory)
         {
             using var context = dbContextFactory.CreateDbContext();
-            var musicians = await context.Musicians
+            return await context.Musicians
                 .Include(m => m.Country)
                 .Include(m => m.Collective)
                 .Include(m => m.Albums)
+                .ProjectTo<MusicianDto>(mapper.ConfigurationProvider)
                 .ToListAsync();
-
-            return musicians.Select(m => m.ToDto());
         }
 
-
-        //в таком случае будет загружаться не вся бд, а только то, что напагинировалось
         [UseDbContext(typeof(MusiciansDbContext))]
         [UsePaging(IncludeTotalCount = true, DefaultPageSize = 10)]
+        [UseProjection]
+        [HotChocolate.Data.UseFiltering]
+        [UseSorting]
         public IQueryable<MusicianDto> GetPaginatedMusicians([ScopedService] MusiciansDbContext context)
         {
+            //var context = dbContextFactory.CreateDbContext();
             return context.Musicians
                 .Include(m => m.Country)
                 .Include(m => m.Collective)
                 .Include(m => m.Albums)
-                .Select(m => m.ToDto());
+                .ProjectTo<MusicianDto>(mapper.ConfigurationProvider);
         }
         #endregion
 
         #region get musicians by country
-        public async Task<IEnumerable<MusicianDto>> GetMusiciansByCountry(string countryName, [Service] IDbContextFactory<MusiciansDbContext> dbContextFactory)
+        public IQueryable<MusicianDto> GetMusiciansByCountry(string countryName, [Service] IDbContextFactory<MusiciansDbContext> dbContextFactory)
         {
-            using var context = dbContextFactory.CreateDbContext();
-            var country = await context.Countries.FirstOrDefaultAsync(c => c.CountryName == countryName);
-
-            if (country == null)
-            {
-                return new List<MusicianDto>();
-            }
-
-            var musicians = await context.Musicians
-                .Where(m => m.CountryId == country.Id)
+            var context = dbContextFactory.CreateDbContext();
+            return context.Musicians
+                .Where(m => m.Country.CountryName == countryName)
                 .Include(m => m.Country)
                 .Include(m => m.Collective)
                 .Include(m => m.Albums)
-                .ToListAsync();
-
-            return musicians.Select(m => m.ToDto());
+                .ProjectTo<MusicianDto>(mapper.ConfigurationProvider);
         }
         #endregion
 
-        #region get all collectives
+        #region get collectives
         public async Task<IEnumerable<CollectiveDto>> GetCollectives([Service] IDbContextFactory<MusiciansDbContext> dbContextFactory)
         {
             using var context = dbContextFactory.CreateDbContext();
 
-            var collectives = await context.Collectives
+            return await context.Collectives
                 .Include(c => c.CollectiveMembers)
-                            .ThenInclude(m => m.Country)
-                .Include(c => c.Albums) 
+                    .ThenInclude(m => m.Country)
+                .Include(c => c.Albums)
+                .ProjectTo<CollectiveDto>(mapper.ConfigurationProvider)
                 .ToListAsync();
-
-            return collectives.Select(c => c.ToDto());
         }
 
-        [UseDbContext(typeof(MusiciansDbContext))]
+
         [UsePaging(IncludeTotalCount = true, DefaultPageSize = 10)]
+        [UseProjection]
+        [HotChocolate.Data.UseFiltering]
+        [UseSorting]
         public IQueryable<CollectiveDto> GetPaginatedCollectives([ScopedService] MusiciansDbContext context)
         {
-            return context.Collectives.Select(c => c.ToDto());
+            //var context = dbContextFactory.CreateDbContext();
+            return context.Collectives
+                .Include(c => c.CollectiveMembers)
+                    .ThenInclude(m => m.Country)
+                .ProjectTo<CollectiveDto>(mapper.ConfigurationProvider);
         }
         #endregion
 
@@ -88,10 +89,10 @@ namespace MusiciansAPI.Queries
             using var context = dbContextFactory.CreateDbContext();
 
             var musician = await context.Musicians
-                .Include(m => m.Collective) 
-                .ThenInclude(c => c.CollectiveMembers) 
                 .Include(m => m.Collective)
-                    .ThenInclude(c => c.Albums) 
+                    .ThenInclude(c => c.CollectiveMembers)
+                .Include(m => m.Collective)
+                    .ThenInclude(c => c.Albums)
                 .FirstOrDefaultAsync(m => m.MusicianName == musicianName);
 
             if (musician?.Collective == null)
@@ -99,35 +100,14 @@ namespace MusiciansAPI.Queries
                 return null;
             }
 
-            return musician.Collective.ToDto();
+            return mapper.Map<CollectiveDto>(musician.Collective);
         }
-
         #endregion
 
         #region get collectives by genre
-        public async Task<IEnumerable<CollectiveDto>> GetCollectivesByGenre(string genre, [Service] IDbContextFactory<MusiciansDbContext> dbContextFactory)
+        public IQueryable<CollectiveDto> GetCollectivesByGenre(string genre, [Service] IDbContextFactory<MusiciansDbContext> dbContextFactory)
         {
-            using var context = dbContextFactory.CreateDbContext();
-
-            if (!Enum.TryParse<Genre>(genre, ignoreCase: true, out var parsedGenre))
-            {
-                return Enumerable.Empty<CollectiveDto>();
-            }
-
-            var collectives = await context.Collectives
-                .Where(c => c.CollectiveGenre == parsedGenre)
-                .Include(c => c.CollectiveMembers)
-                            .ThenInclude(m => m.Country)
-                .Include(c => c.Albums)
-                .ToListAsync();
-
-            return collectives.Select(c => c.ToDto());
-        }
-
-        [UseDbContext(typeof(MusiciansDbContext))]
-        [UsePaging(IncludeTotalCount = true, DefaultPageSize = 10)]
-        public IQueryable<CollectiveDto> GetPaginatedCollectiveByGenre(string genre, [ScopedService] MusiciansDbContext context) 
-        {
+            var context = dbContextFactory.CreateDbContext();
             if (!Enum.TryParse<Genre>(genre, ignoreCase: true, out var parsedGenre))
             {
                 return Enumerable.Empty<CollectiveDto>().AsQueryable();
@@ -138,7 +118,27 @@ namespace MusiciansAPI.Queries
                 .Include(c => c.CollectiveMembers)
                     .ThenInclude(m => m.Country)
                 .Include(c => c.Albums)
-                .Select(c => c.ToDto());
+                .ProjectTo<CollectiveDto>(mapper.ConfigurationProvider);
+        }
+
+        [UsePaging(IncludeTotalCount = true, DefaultPageSize = 10)]
+        [UseProjection]
+        [HotChocolate.Data.UseFiltering]
+        [UseSorting]
+        public IQueryable<CollectiveDto> GetPaginatedCollectiveByGenre(string genre, [ScopedService] MusiciansDbContext context)
+        {
+            //var context = dbContextFactory.CreateDbContext();
+            if (!Enum.TryParse<Genre>(genre, ignoreCase: true, out var parsedGenre))
+            {
+                return Enumerable.Empty<CollectiveDto>().AsQueryable();
+            }
+
+            return context.Collectives
+                .Where(c => c.CollectiveGenre == parsedGenre)
+                .Include(c => c.CollectiveMembers)
+                    .ThenInclude(m => m.Country)
+                .Include(c => c.Albums)
+                .ProjectTo<CollectiveDto>(mapper.ConfigurationProvider);
         }
         #endregion
     }

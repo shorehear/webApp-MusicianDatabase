@@ -1,30 +1,40 @@
-﻿using MusiciansAPI.Database;
+﻿using AutoMapper;
+using MusiciansAPI.Database;
 using MusiciansAPI.Repositories;
 
 namespace MusiciansAPI.Mutations
 {
     public class Mutation
     {
+        private readonly IMapper mapper;
         private readonly MusiciansRepository musiciansRepository;
         private readonly CountriesRepository countriesRepository;
         private readonly CollectivesRepository collectivesRepository;
-        public Mutation(MusiciansRepository musiciansRepository, CountriesRepository countriesRepository, CollectivesRepository collectivesRepository) 
+        public Mutation(IMapper mapper, MusiciansRepository musiciansRepository, CountriesRepository countriesRepository, CollectivesRepository collectivesRepository) 
         { 
+            this.mapper = mapper;
             this.musiciansRepository = musiciansRepository; 
             this.countriesRepository = countriesRepository;
             this.collectivesRepository = collectivesRepository;
         }
 
         #region create musician
-        public async Task<MusicianDto> CreateMusician(
+        public async Task<MusicianDto> CreateMusician
+        (
             string musicianName,
-            DateTime musicianBirthDate,
-            DateTime? musicianDeathDate,
             string countryName,
-            string? collectiveName = null)
+            DateTime musicianBirthDate,
+            DateTime? musicianDeathDate = null,
+            string? collectiveName = null
+        )
         {
             var musicianId = Guid.NewGuid();
+
             var country = await countriesRepository.GetOrCreateCountryAsync(countryName);
+            if (country == null)
+            {
+                throw new Exception("Не удалось найти или создать страну");
+            }
 
             Collective? collective = null;
             if (!string.IsNullOrEmpty(collectiveName))
@@ -32,19 +42,30 @@ namespace MusiciansAPI.Mutations
                 collective = await collectivesRepository.GetOrCreateCollectiveAsync(collectiveName);
             }
 
-            var musician = new Musician
+            Musician musician = new Musician()
             {
                 Id = musicianId,
                 MusicianName = musicianName,
+                CountryId = country.Id,
                 MusicianBirthDate = musicianBirthDate,
                 MusicianDeathDate = musicianDeathDate,
-                CountryId = country.Id,
                 CollectiveId = collective?.Id
             };
 
             var createdMusician = await musiciansRepository.Create(musician);
 
-            return createdMusician.ToDto();
+            var musicianDto = mapper.Map<MusicianDto>(createdMusician);
+
+            if (musicianDto.Country == null)
+            {
+                musicianDto.Country = mapper.Map<CountryDto>(country);
+            }
+            if (musicianDto.Collective == null && collective != null)
+            {
+                musicianDto.Collective = mapper.Map<CollectiveDto>(collective);
+            }
+
+            return musicianDto;
         }
         #endregion
 
@@ -83,13 +104,13 @@ namespace MusiciansAPI.Mutations
 
             var updatedMusician = await musiciansRepository.Update(musician);
 
-            return updatedMusician.ToDto();
+            return mapper.Map<MusicianDto>(updatedMusician);
         }
         #endregion
 
         #region delete musician and related albums
         public async Task<bool> DeleteMusician(
-            string? musicianName = null, 
+            string? musicianName = null,
             Guid? musicianId = null)
         {
             Musician? musician = null;
@@ -112,67 +133,18 @@ namespace MusiciansAPI.Mutations
                 throw new Exception("Musician not found.");
             }
 
-            if(musician.Albums != null && musician.Albums.Any())
+            if (musician.Albums != null && musician.Albums.Any())
             {
-                foreach(var album in musician.Albums)
+                foreach (var album in musician.Albums)
                 {
                     await musiciansRepository.DeleteAlbumAsync(album.Id);
                 }
             }
-            
 
-            bool isDeleted = await musiciansRepository.Delete(musician.Id);
-            return isDeleted;
+            return await musiciansRepository.Delete(musician.Id);
         }
+
         #endregion
-        //public async Task<CollectiveDto> CreateCollective() { return null; }
 
-        #region add album data to collective/musician
-        //public async Task<AlbumDto> AddAlbum(
-        //    string albumTitle,
-        //    int numberOfTracks,
-        //    int releaseYear,
-        //    string? collectiveName = null,
-        //    string? musicianName = null,
-        //    Guid? collectiveId = null,
-        //    Guid? musicianId = null)
-        //{
-        //    Musician? musician = null;
-        //    Collective? collective = null;
-
-        //    if that is musician
-        //    if (musicianId.HasValue)
-        //        {
-        //            musician = await musiciansRepository.GetByIdAsync(musicianId.Value);
-        //        }
-        //        else if (!string.IsNullOrEmpty(musicianName))
-        //        {
-        //            musician = await musiciansRepository.GetMusicianByNameAsync(musicianName);
-        //        }
-
-        //    if that is collective
-        //    if (collectiveId.HasValue)
-        //        {
-        //            collective = await collectivesRepository.
-        //    }
-        //    if (musician == null && collective == null)
-        //    {
-        //        throw new Exception("You must provide musician or collective to associate with album.");
-        //    }
-
-        //    var album = new Album
-        //    {
-        //        Id = Guid.NewGuid(),
-        //        AlbumTitle = albumTitle,
-        //        NumberOfTracks = numberOfTracks,
-        //        ReleaseYear = releaseYear,
-        //        Musician = musician,
-        //        Collective = collective
-        //    };
-
-        //    var addedAlbum = await musiciansRepository.AddAlbumAsync(album);
-        //    return new
-        //}
-        #endregion
     }
 }

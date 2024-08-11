@@ -4,6 +4,8 @@ using SQLitePCL;
 using MusiciansAPI.Queries;
 using MusiciansAPI.Repositories;
 using MusiciansAPI.Mutations;
+using MusiciansAPI.Mapper;
+
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("default");
@@ -17,9 +19,25 @@ builder.Services
     .AddType<CollectiveDto>()
     .AddType<CountryDto>()
     .AddType<AlbumDto>()
-    .AddType<Genre>();
+    .AddType<Genre>()
+    .AddFiltering()
+    .AddSorting()
+    .AddProjections();
 
-builder.Services.AddPooledDbContextFactory<MusiciansDbContext>(m => m.UseSqlite(connectionString).LogTo(Console.WriteLine));
+builder.Services.AddAutoMapper(typeof(MappingProfile));
+
+builder.Services.AddPooledDbContextFactory<MusiciansDbContext>(options =>
+    options.UseSqlite(connectionString)
+           .LogTo(sql =>
+           {
+               Console.ForegroundColor = ConsoleColor.Magenta;
+               Console.WriteLine(sql);
+               Console.ResetColor();
+           }, LogLevel.Information)
+           .EnableSensitiveDataLogging()
+           .EnableDetailedErrors());
+
+
 builder.Services.AddScoped<MusiciansRepository>();
 builder.Services.AddScoped<CollectivesRepository>();
 builder.Services.AddScoped<CountriesRepository>();
@@ -53,7 +71,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-app.UseAuthorization();
+app.UseAuthentication();
+//app.UseAuthorization();
 
 app.MapGraphQL();  
 app.MapRazorPages();
