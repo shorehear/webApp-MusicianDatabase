@@ -3,14 +3,40 @@ using Microsoft.EntityFrameworkCore;
 using Musicians.Database;
 using Musicians.DataAccess;
 using Musicians.GraphQL;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Musicians.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
+Batteries.Init();
 
 var connectionString = builder.Configuration.GetConnectionString("default");
-Batteries.Init();
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+//var signingKey = new SymmetricSecurityKey(
+//            Encoding.UTF8.GetBytes("ItIsVerySecretKeyThatIsAtLeast32BytesLong"));
+
+var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]));
+
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+            ValidAudience = builder.Configuration["JwtSettings:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]))
+        };
+    });
 
 builder.Services
     .AddGraphQLServer()
+    .AddAuthorization()
     .AddQueryType<Query>()
     .AddMutationType<Mutation>()
     .AddType<MusicianDto>()
@@ -21,6 +47,9 @@ builder.Services
     .AddFiltering()
     .AddSorting()
     .AddProjections();
+
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+builder.Services.AddScoped<JWT>();
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
@@ -34,6 +63,7 @@ builder.Services.AddPooledDbContextFactory<MusiciansDbContext>(options =>
            }, LogLevel.Information)
            .EnableSensitiveDataLogging()
            .EnableDetailedErrors());
+
 
 builder.Services.AddScoped<MusiciansRepository>();
 builder.Services.AddScoped<CollectivesRepository>();
@@ -60,6 +90,9 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapGraphQL();
 app.Run();

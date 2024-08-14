@@ -11,6 +11,6 @@ namespace Musicians.Database
         public DbSet<Musician> Musicians { get; set; }
         public DbSet<Collective> Collectives { get; set; }
         public DbSet<Album> Albums { get; set; }
-        public DbSet<User> User { get; set; }
+        public DbSet<User> Users { get; set; }
     }
 }

@@ -1,70 +1,74 @@
 ﻿using AutoMapper;
 using HotChocolate.Authorization;
+using Musicians.Auth;
 using Musicians.DataAccess;
 using Musicians.Database;
-
+using BCrypt;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
 
 namespace Musicians.GraphQL
 {
     public class Mutation
     {
+        private readonly JWT jwt;
         private readonly IMapper mapper;
         private readonly MusiciansRepository musiciansRepository;
         private readonly CountriesRepository countriesRepository;
         private readonly CollectivesRepository collectivesRepository;
-        public Mutation(IMapper mapper, MusiciansRepository musiciansRepository, CountriesRepository countriesRepository, CollectivesRepository collectivesRepository)
+        public Mutation(IMapper mapper, MusiciansRepository musiciansRepository, JWT jwt,
+                        CountriesRepository countriesRepository, CollectivesRepository collectivesRepository)
         {
             this.mapper = mapper;
+            this.jwt = jwt;
             this.musiciansRepository = musiciansRepository;
             this.countriesRepository = countriesRepository;
             this.collectivesRepository = collectivesRepository;
         }
 
-        //public async Task<User> RegisterUser([Service] MusiciansDbContext context, string username, string password)
-        //{
-        //    var user = new User
-        //    {
-        //        Username = username,
-        //        Password = BCrypt.Net.BCrypt.HashPassword(password)
-        //    };
+        #region jwt register & login user
+        public async Task<User> RegisterUser([Service] IDbContextFactory<MusiciansDbContext> contextFactory, string username, string password)
+        {
+            using var context = contextFactory.CreateDbContext();
+            try
+            {
+                var user = new User
+                {
+                    Id = Guid.NewGuid(),
+                    Username = username,
+                    Password = BCrypt.Net.BCrypt.HashPassword(password)
+                };
 
-        //    context.Users.Add(user);
-        //    await context.SaveChangesAsync();
+                context.Users.Add(user);
+                await context.SaveChangesAsync();
 
-        //    return user;
-        //}
+                return user;
+            }
+            catch (DbUpdateException ex)
+            {
+                Console.WriteLine(ex.InnerException?.Message ?? ex.Message);
+                throw;
+            }
+        }
 
-        //public async Task<string> Login([Service] MusiciansDbContext context, string username, string password)
-        //{
-        //    var user = await context.Users.FirstOrDefaultAsync(u => u.Username == username);
-        //    if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.Password))
-        //    {
-        //        throw new Exception("Invalid credentials");
-        //    }
+        public async Task<string> Login([Service] IDbContextFactory <MusiciansDbContext> contextFactory, string username, string password)
+        {
+            using var context = contextFactory.CreateDbContext();
 
-        //    var tokenHandler = new JwtSecurityTokenHandler();
-        //    var key = Encoding.UTF8.GetBytes("yoursecretkey");
-        //    var tokenDescriptor = new SecurityTokenDescriptor
-        //    {
-        //        Subject = new ClaimsIdentity(new[]
-        //        {
-        //        new Claim(ClaimTypes.Name, user.Username)
-        //    }),
-        //        Expires = DateTime.UtcNow.AddHours(1),
-        //        Issuer = "yourissuer",
-        //        Audience = "youraudience",
-        //        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-        //    };
-        //    var token = tokenHandler.CreateToken(tokenDescriptor);
-        //    return tokenHandler.WriteToken(token);
-        //}
+            var user = await context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.Password))
+            {
+                throw new Exception("Invalid credentials");
+            }
+
+            return jwt.GenerateJwtToken(user.Username);
+        }
+        #endregion
 
         #region create musician
-        //[Authorize(Policy = "AuthenticatedUser")]
-        //[Authorize]
+        [Authorize]
         public async Task<MusicianDto> CreateMusician
-        (
-            string musicianName,
+        (            string musicianName,
             string countryName,
             DateTime musicianBirthDate,
             DateTime? musicianDeathDate = null,
@@ -113,7 +117,7 @@ namespace Musicians.GraphQL
         #endregion
 
         #region update musician main parameters
-        //[Authorize]
+        [Authorize]
         public async Task<MusicianDto> UpdateMusician(
             Guid? musicianId = null,
             string? musicianName = null,
@@ -153,7 +157,7 @@ namespace Musicians.GraphQL
         #endregion
 
         #region delete musician and related albums
-        //[Authorize]
+        [Authorize]
         public async Task<bool> DeleteMusician(
             string? musicianName = null,
             Guid? musicianId = null)
@@ -188,7 +192,6 @@ namespace Musicians.GraphQL
 
             return await musiciansRepository.Delete(musician.Id);
         }
-
         #endregion
 
     }

@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Musicians.DataAccess", "Mus
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Musicians.GraphQL", "Musicians.GraphQL\Musicians.GraphQL.csproj", "{9626D2A3-3238-49AF-A28E-D309BE694BF0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Musicians.Tests", "Musicians.Tests\Musicians.Tests.csproj", "{AAC230E9-FFF9-4FB6-B19D-D047DC701A1D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Musicians.Auth", "Musicians.Auth\Musicians.Auth.csproj", "{D8F77790-C73F-4D49-B6B3-B81C9CAB9A8F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{9626D2A3-3238-49AF-A28E-D309BE694BF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9626D2A3-3238-49AF-A28E-D309BE694BF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9626D2A3-3238-49AF-A28E-D309BE694BF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AAC230E9-FFF9-4FB6-B19D-D047DC701A1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AAC230E9-FFF9-4FB6-B19D-D047DC701A1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AAC230E9-FFF9-4FB6-B19D-D047DC701A1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AAC230E9-FFF9-4FB6-B19D-D047DC701A1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8F77790-C73F-4D49-B6B3-B81C9CAB9A8F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8F77790-C73F-4D49-B6B3-B81C9CAB9A8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8F77790-C73F-4D49-B6B3-B81C9CAB9A8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8F77790-C73F-4D49-B6B3-B81C9CAB9A8F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

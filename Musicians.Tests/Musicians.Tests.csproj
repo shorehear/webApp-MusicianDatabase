@@ -10,10 +10,23 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="13.9.11" />
+    <PackageReference Include="HotChocolate.Data.EntityFramework" Version="13.9.11" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="8.0.8" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageReference Include="xunit" Version="2.5.3" />
+    <PackageReference Include="xunit.extensibility.core" Version="2.9.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Musicians.API\Musicians.API.csproj" />
+    <ProjectReference Include="..\Musicians.DataAccess\Musicians.DataAccess.csproj" />
+    <ProjectReference Include="..\Musicians.Database\Musicians.Database.csproj" />
+    <ProjectReference Include="..\Musicians.GraphQL\Musicians.GraphQL.csproj" />
   </ItemGroup>
 
   <ItemGroup>
