@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <PackageReference Include="HotChocolate" Version="13.9.11" />
+    <PackageReference Include="HotChocolate.AspNetCore" Version="13.9.11" />
+    <PackageReference Include="HotChocolate.Data" Version="13.9.11" />
+    <PackageReference Include="HotChocolate.Data.EntityFramework" Version="13.9.11" />
+    <PackageReference Include="HotChocolate.Pagination" Version="1.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Musicians.DataAccess\Musicians.DataAccess.csproj" />
+    <ProjectReference Include="..\Musicians.Database\Musicians.Database.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Schema\Subscriptions\" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <PackageReference Include="HotChocolate" Version="13.9.11" />
+    <PackageReference Include="HotChocolate.AspNetCore" Version="13.9.11" />
+    <PackageReference Include="HotChocolate.Data" Version="13.9.11" />
+    <PackageReference Include="HotChocolate.Data.EntityFramework" Version="13.9.11" />
+    <PackageReference Include="HotChocolate.Pagination" Version="1.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Musicians.DataAccess\Musicians.DataAccess.csproj" />
+    <ProjectReference Include="..\Musicians.Database\Musicians.Database.csproj" />
+    <ProjectReference Include="..\Musicians.GraphQL\Musicians.GraphQL.csproj" />
+  </ItemGroup>
+
+</Project>
