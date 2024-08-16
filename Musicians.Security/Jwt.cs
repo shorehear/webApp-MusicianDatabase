@@ -4,24 +4,29 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace Musicians.Auth
+namespace Musicians.Security
 {
+    public interface IJwt
+    {
+        string GenerateJwtToken(string username);
+    }
+
     public class JwtSettings
     {
         public string Key { get; set; } = null!;
         public string Issuer { get; set; } = null!;
         public string Audience { get; set; } = null!;
     }
-    public class JWT
+    public class Jwt : IJwt
     {
         private readonly JwtSettings jwtSettings;
 
-        public JWT(IOptions<JwtSettings> options)
+        public Jwt(IOptions<JwtSettings> options)
         {
             jwtSettings = options.Value;
         }
 
-        public string GenerateJwtToken(string username)
+        public virtual string GenerateJwtToken(string username)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -34,9 +39,9 @@ namespace Musicians.Auth
 
             var token = new JwtSecurityToken(
                 issuer: jwtSettings.Issuer,
-                audience: jwtSettings.Audience, 
+                audience: jwtSettings.Audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(30), 
+                expires: DateTime.UtcNow.AddMinutes(30),
                 signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);

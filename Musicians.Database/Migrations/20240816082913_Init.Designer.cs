@@ -11,7 +11,7 @@ using Musicians.Database;
 namespace Musicians.Database.Migrations
 {
     [DbContext(typeof(MusiciansDbContext))]
-    [Migration("20240814150201_Init")]
+    [Migration("20240816082913_Init")]
     partial class Init
     {
         /// <inheritdoc />

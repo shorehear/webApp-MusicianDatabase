@@ -3,26 +3,36 @@ using Musicians.Database;
 
 namespace Musicians.GraphQL
 {
-    public class MusiciansRepository
+    public interface IMusiciansRepository
+    {
+        Task<Musician> Create(Musician musician);
+        Task<Musician> Update(Musician musician);
+        Task<bool> Delete(Guid id);
+        Task<Musician> GetByIdAsync(Guid id);
+        Task<Musician> GetMusicianByNameAsync(string name);
+        Task<bool> DeleteAlbumAsync(Guid albumId);
+    }
+
+    public class MusiciansRepository : IMusiciansRepository
     {
         private readonly IDbContextFactory<MusiciansDbContext> dbContextFactory;
 
-        public MusiciansRepository(IDbContextFactory<MusiciansDbContext> dbContextFactory) 
+        public MusiciansRepository(IDbContextFactory<MusiciansDbContext> dbContextFactory)
         {
             this.dbContextFactory = dbContextFactory;
         }
 
-        public async Task<Musician> Create(Musician musician)
+        public virtual async Task<Musician> Create(Musician musician)
         {
             using (MusiciansDbContext context = dbContextFactory.CreateDbContext())
             {
                 context.Musicians.Add(musician);
                 await context.SaveChangesAsync();
-            
+
                 return musician;
             }
         }
-        public async Task<Musician> Update(Musician musician)
+        public virtual async Task<Musician> Update(Musician musician)
         {
             using (MusiciansDbContext context = dbContextFactory.CreateDbContext())
             {
@@ -33,7 +43,7 @@ namespace Musicians.GraphQL
             }
         }
 
-        public async Task<bool> Delete(Guid id)
+        public virtual async Task<bool> Delete(Guid id)
         {
             using (MusiciansDbContext context = dbContextFactory.CreateDbContext())
             {
@@ -43,7 +53,7 @@ namespace Musicians.GraphQL
             }
         }
 
-        public async Task<Musician> GetByIdAsync(Guid id)
+        public virtual async Task<Musician> GetByIdAsync(Guid id)
         {
             using (MusiciansDbContext context = dbContextFactory.CreateDbContext())
             {
@@ -51,7 +61,7 @@ namespace Musicians.GraphQL
             }
         }
 
-        public async Task<Musician> GetMusicianByNameAsync(string name)
+        public virtual async Task<Musician> GetMusicianByNameAsync(string name)
         {
             using (MusiciansDbContext context = dbContextFactory.CreateDbContext())
             {
@@ -59,7 +69,7 @@ namespace Musicians.GraphQL
             }
         }
 
-        public async Task<bool> DeleteAlbumAsync(Guid albumId)
+        public virtual async Task<bool> DeleteAlbumAsync(Guid albumId)
         {
             using (MusiciansDbContext context = dbContextFactory.CreateDbContext())
             {

@@ -1,0 +1,21 @@
+{
+  "data": {
+    "musicians": [
+      {
+        "musicianName": "John Lennon"
+      },
+      {
+        "musicianName": "Paul McCartney"
+      },
+      {
+        "musicianName": "John Lennon"
+      },
+      {
+        "musicianName": "Paul McCartney"
+      },
+      {
+        "musicianName": "Freddie Mercury"
+      }
+    ]
+  }
+}

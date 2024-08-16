@@ -1,23 +1,22 @@
 ﻿using AutoMapper;
 using HotChocolate.Authorization;
-using Musicians.Auth;
+using Musicians.Security;
 using Musicians.DataAccess;
 using Musicians.Database;
 using BCrypt;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Http;
 
 namespace Musicians.GraphQL
 {
     public class Mutation
     {
-        private readonly JWT jwt;
         private readonly IMapper mapper;
-        private readonly MusiciansRepository musiciansRepository;
-        private readonly CountriesRepository countriesRepository;
-        private readonly CollectivesRepository collectivesRepository;
-        public Mutation(IMapper mapper, MusiciansRepository musiciansRepository, JWT jwt,
-                        CountriesRepository countriesRepository, CollectivesRepository collectivesRepository)
+        private readonly IMusiciansRepository musiciansRepository;
+        private readonly ICountriesRepository countriesRepository;
+        private readonly ICollectivesRepository collectivesRepository;
+        private readonly IJwt jwt;
+        public Mutation(IMapper mapper, IMusiciansRepository musiciansRepository, IJwt jwt,
+                        ICountriesRepository countriesRepository, ICollectivesRepository collectivesRepository)
         {
             this.mapper = mapper;
             this.jwt = jwt;
@@ -51,7 +50,7 @@ namespace Musicians.GraphQL
             }
         }
 
-        public async Task<string> Login([Service] IDbContextFactory <MusiciansDbContext> contextFactory, string username, string password)
+        public async Task<string> Login([Service] IDbContextFactory<MusiciansDbContext> contextFactory, string username, string password)
         {
             using var context = contextFactory.CreateDbContext();
 
@@ -66,9 +65,9 @@ namespace Musicians.GraphQL
         #endregion
 
         #region create musician
-        [Authorize]
+        //[Authorize]
         public async Task<MusicianDto> CreateMusician
-        (            string musicianName,
+        (string musicianName,
             string countryName,
             DateTime musicianBirthDate,
             DateTime? musicianDeathDate = null,

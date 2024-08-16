@@ -1,0 +1,18 @@
+{
+  "data": {
+    "musiciansByCountry": [
+      {
+        "musicianName": "Paul McCartney",
+        "country": {
+          "countryName": "USA"
+        }
+      },
+      {
+        "musicianName": "John Lennon",
+        "country": {
+          "countryName": "USA"
+        }
+      }
+    ]
+  }
+}

@@ -6,15 +6,13 @@ using Musicians.GraphQL;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Musicians.Auth;
+using Musicians.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 Batteries.Init();
 
 var connectionString = builder.Configuration.GetConnectionString("default");
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-//var signingKey = new SymmetricSecurityKey(
-//            Encoding.UTF8.GetBytes("ItIsVerySecretKeyThatIsAtLeast32BytesLong"));
 
 var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]));
 
@@ -49,7 +47,7 @@ builder.Services
     .AddProjections();
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
-builder.Services.AddScoped<JWT>();
+builder.Services.AddScoped<IJwt, Jwt>();
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
@@ -65,9 +63,9 @@ builder.Services.AddPooledDbContextFactory<MusiciansDbContext>(options =>
            .EnableDetailedErrors());
 
 
-builder.Services.AddScoped<MusiciansRepository>();
-builder.Services.AddScoped<CollectivesRepository>();
-builder.Services.AddScoped<CountriesRepository>();
+builder.Services.AddScoped<IMusiciansRepository, MusiciansRepository>();
+builder.Services.AddScoped<ICollectivesRepository, CollectivesRepository>();
+builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
 
 var app = builder.Build();
 

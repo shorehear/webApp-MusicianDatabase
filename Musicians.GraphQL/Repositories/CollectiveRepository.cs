@@ -3,7 +3,11 @@ using Musicians.Database;
 
 namespace Musicians.GraphQL
 {
-    public class CollectivesRepository
+    public interface ICollectivesRepository
+    {
+        Task<Collective> GetOrCreateCollectiveAsync(string collectiveName);
+    }
+    public class CollectivesRepository : ICollectivesRepository
     {
         private readonly IDbContextFactory<MusiciansDbContext> dbContextFactory;
         public CollectivesRepository(IDbContextFactory<MusiciansDbContext> dbContextFactory)
@@ -11,7 +15,7 @@ namespace Musicians.GraphQL
             this.dbContextFactory = dbContextFactory;
         }
 
-        public async Task<Collective> GetOrCreateCollectiveAsync(string collectiveName)
+        public virtual async Task<Collective> GetOrCreateCollectiveAsync(string collectiveName)
         {
             using var context = dbContextFactory.CreateDbContext();
 
